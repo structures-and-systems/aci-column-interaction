@@ -6,8 +6,8 @@
 Section configuration
 + Material properties
 + Reinforcement layout
++ Neutral-axis position
 + Calculation assumptions
-+ Neutral-axis positions
 --------------------------------
-Axial-moment interaction points
+Axial-moment interaction point
 ```
