@@ -48,6 +48,35 @@ component forces to support equilibrium review. Balanced-point evaluation,
 capacity-state classification, strength reduction, and neutral-axis iteration
 remain separate features.
 
+## Reinforcement resolution
+
+Use the reinforcement utilities to prepare physical layers before calling the
+core. Layer groups are caller-designated; the utility does not reclassify their
+stress state for a neutral-axis position.
+
+```ts
+import {
+  createPmCalculationAssumptions,
+  resolveReinforcement,
+} from "column-interaction";
+
+const reinforcement = resolveReinforcement({
+  tensionLayers: [
+    { area: 400, depthFromCompressionFace: 400 },
+    { area: 800, depthFromCompressionFace: 450 },
+  ],
+  compressionLayers: [{ area: 600, depthFromCompressionFace: 50 }],
+  sectionDepth: 500,
+});
+
+const assumptions = createPmCalculationAssumptions(0.85);
+```
+
+`createPmCalculationAssumptions` provides the current named ACI defaults for
+ultimate concrete strain (`0.003`) and the rectangular compression stress
+coefficient (`0.85`). `beta1` is required explicitly because its ACI value
+depends on concrete strength and code edition.
+
 ## Development
 
 ```sh

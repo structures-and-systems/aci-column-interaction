@@ -18,3 +18,17 @@ export type {
   ResolvedSteel,
   SteelMaterial,
 } from "./src/core/pm-capacity.ts";
+
+export {
+  DEFAULT_ACI_PMA_ASSUMPTIONS,
+  calculateAreaWeightedDepth,
+  createPmCalculationAssumptions,
+  resolveReinforcement,
+  resolveSteelGroup,
+} from "./src/reinforcement/resolution.ts";
+
+export type {
+  ReinforcementGroups,
+  ReinforcementLayer,
+  ResolvedReinforcement,
+} from "./src/reinforcement/resolution.ts";
