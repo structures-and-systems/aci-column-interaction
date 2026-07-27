@@ -32,3 +32,13 @@ export type {
   ReinforcementLayer,
   ResolvedReinforcement,
 } from "./src/reinforcement/resolution.ts";
+
+export {
+  calculateInteractionDiagram,
+  calculatePmCapacityPointFromLayers,
+} from "./src/adapters/interaction.ts";
+
+export type {
+  LayerBasedPmCapacityInput,
+  PmCapacityBaseInput,
+} from "./src/adapters/interaction.ts";

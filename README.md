@@ -77,6 +77,29 @@ ultimate concrete strain (`0.003`) and the rectangular compression stress
 coefficient (`0.85`). `beta1` is required explicitly because its ACI value
 depends on concrete strength and code edition.
 
+## Adapters
+
+Use `calculatePmCapacityPointFromLayers` when a caller has physical layers, or
+use `calculateInteractionDiagram` when its reinforcement is already resolved.
+The interaction adapter preserves the caller's neutral-axis depth order and
+does not select, sort, extend, deduplicate, or classify points.
+
+```ts
+import { calculateInteractionDiagram } from "column-interaction";
+
+const points = calculateInteractionDiagram(
+  {
+    section: { width: 300, depth: 500 },
+    concrete: { compressiveStrength: 30 },
+    steel: { yieldStrength: 500, elasticModulus: 200_000 },
+    assumptions: createPmCalculationAssumptions(0.85),
+    tensionSteel: reinforcement.tensionSteel,
+    compressionSteel: reinforcement.compressionSteel,
+  },
+  [500, 300, 200, 100],
+);
+```
+
 ## Development
 
 ```sh
