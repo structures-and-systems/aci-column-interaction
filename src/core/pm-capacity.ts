@@ -100,7 +100,7 @@ const calculateSteelComponent = (
   const displacedConcreteStress =
     resolvedSteel.depthFromCompressionFace < concreteBlock.depth
       ? input.assumptions.rectangularCompressionStressCoefficient *
-        input.concrete.compressiveStrength
+      input.concrete.compressiveStrength
       : 0;
   const force = (stress - displacedConcreteStress) * resolvedSteel.area;
 
@@ -155,11 +155,11 @@ export const calculatePmCapacityPoint = (
     input.compressionSteel === undefined
       ? undefined
       : calculateSteelComponent(
-          "compressionSteel",
-          input.compressionSteel,
-          input,
-          concreteBlock,
-        );
+        "compressionSteel",
+        input.compressionSteel,
+        input,
+        concreteBlock,
+      );
   const nominalAxialForce =
     concrete.force + tensionSteel.force + (compressionSteel?.force ?? 0);
   const nominalMoment =
