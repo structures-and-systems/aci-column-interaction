@@ -2,7 +2,7 @@ import {
   calculatePmCapacityPoint,
   type PmCapacityInput,
   type PmCapacityPoint,
-} from "../core/pm-capacity.ts";
+} from "../core/index.ts";
 import {
   resolveReinforcement,
   type ReinforcementGroups,

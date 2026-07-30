@@ -6,7 +6,7 @@ import {
   createPmCalculationAssumptions,
   resolveReinforcement,
   resolveSteelGroup,
-} from "./resolution.ts";
+} from "../../src/reinforcement/resolution.ts";
 
 describe("calculateAreaWeightedDepth", () => {
   it("returns a single layer unchanged", () => {

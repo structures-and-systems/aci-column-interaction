@@ -28,3 +28,22 @@ The core is deliberately only the single-point calculation. An interaction-diagr
 - Keep the engine functional, stateless, and composed from small pure functions.
 - Maintain strict TypeScript compatibility (`strict` and `noUncheckedIndexedAccess` are enabled).
 - Do not introduce `any` in calculation code; use precise types for engineering input and result states.
+- Use `type` for data structures and simple entities.
+- Use `interface` for contracts.
+
+## Coding Style
+
+- Follow Clean Architecture by Robert C. Martin.
+- Be mindful of boundaries, responsibilities, and dependencies.
+- Keep files short with max 400 lines. Refactor if necessary.
+- Use consistent naming conventions for files, variables, and functions (`camelCase`).
+- Use `_` (underscore) prefix for private fields and methods.
+
+## Planning, Implementation and Overall Responses
+
+- Always conduct a debriefing, explaining not just what changed but, more importantly, why.
+- State assumptions, limitations and trade-offs.
+- Avoid using heavy jargon or abbreviations; write for a general engineering audience. Otherwise, provide a corresponding explanation.
+- Do not assume the reader has access to the entire codebase; provide context and references to relevant files or sections.
+- Assume the reader has experience with different languages and frameworks (JavaScript, Python, C++ and C, React, Vue, Blazor, Shiny). Thus, consider providing comparisons or analogies to help them understand the code and its purpose.
+- When asked for explanations, opt to use mental models and parallel examples or implementations from other languages to explain concepts.

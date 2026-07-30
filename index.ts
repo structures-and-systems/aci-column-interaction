@@ -5,19 +5,9 @@ export {
   calculateSteelStress,
   calculateSteelStressWithYieldCap,
   validatePmCapacityInput,
-} from "./src/core/pm-capacity.ts";
+} from "./src/core/index.ts";
 
-export type {
-  CapacityComponent,
-  ConcreteCompressionBlock,
-  ConcreteMaterial,
-  PmCapacityInput,
-  PmCapacityPoint,
-  PmCalculationAssumptions,
-  RectangularSection,
-  ResolvedSteel,
-  SteelMaterial,
-} from "./src/core/pm-capacity.ts";
+export type * from "./src/core/index.ts";
 
 export {
   DEFAULT_ACI_PMA_ASSUMPTIONS,

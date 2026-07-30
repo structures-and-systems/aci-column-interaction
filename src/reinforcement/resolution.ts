@@ -1,7 +1,7 @@
 import type {
   PmCalculationAssumptions,
   ResolvedSteel,
-} from "../core/pm-capacity.ts";
+} from "../core/index.ts";
 
 /**
  * A physical longitudinal reinforcement layer before it is aggregated for the

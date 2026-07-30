@@ -1,12 +1,12 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { calculatePmCapacityPoint } from "../core/pm-capacity.ts";
+import { calculatePmCapacityPoint } from "../../src/core/pm-capacity.ts";
 import {
   calculateInteractionDiagram,
   calculatePmCapacityPointFromLayers,
   type LayerBasedPmCapacityInput,
   type PmCapacityBaseInput,
-} from "./interaction.ts";
+} from "../../src/adapters/interaction.ts";
 
 const baseInput: PmCapacityBaseInput = {
   section: { width: 300, depth: 500 },

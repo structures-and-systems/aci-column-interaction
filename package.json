@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "checkTest": "bun run typecheck && bun run test",
     "test": "jest",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit"

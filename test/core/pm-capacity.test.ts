@@ -1,13 +1,12 @@
 import { describe, expect, it } from "@jest/globals";
-
 import {
   calculateConcreteCompressionBlock,
   calculatePmCapacityPoint,
   calculateSteelStrain,
   calculateSteelStress,
-  calculateSteelStressWithYieldCap,
-  type PmCapacityInput,
-} from "./pm-capacity.ts";
+  calculateSteelStressWithYieldCap
+} from "../../src/core";
+import type { PmCapacityInput } from "../../src/core";
 
 const input: PmCapacityInput = {
   section: { width: 300, depth: 500 },
