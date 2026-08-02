@@ -91,3 +91,10 @@ export interface PmCapacityPoint {
   readonly nominalMoment: number;
   readonly components: PmCapacityComponents;
 }
+
+// Output for validation tests agains the spreadsheet
+export interface UltimatePMState {
+  neutralAxisDepth: number;
+  axialForce: number;
+  moment: number;
+}
