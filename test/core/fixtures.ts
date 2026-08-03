@@ -51,9 +51,9 @@ const _compressionSteelComponent: CapacityComponent = {
 };
 
 export const expectedOutput = {
-  pn: 2_891_700,
-  pu: 1080.4,
-  mu: 207.0,
+  nominalAxialForce: 2_133_571.8,
+  ultimateAxialForce: 1080.4,
+  nominalMoment: 207.0,
   neutralAxisDepth: _neutralAxisDepth,
   concreteComponent: _concreteComponent,
   tensionSteelComponent: _tensionSteelComponent,

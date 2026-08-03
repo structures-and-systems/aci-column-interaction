@@ -75,13 +75,7 @@ export const calculateConcreteCompressionBlock = (
   };
 };
 
-const calculateMomentAboutSectionCentroid = (
-  force: number,
-  depthFromCompressionFace: number,
-  sectionDepth: number,
-): number => force * (sectionDepth / 2 - depthFromCompressionFace);
-
-const calculateSteelComponent = (
+export const calculateSteelComponent = (
   name: "tensionSteel" | "compressionSteel",
   resolvedSteel: ResolvedSteel,
   input: PmCapacityInput,
@@ -117,6 +111,23 @@ const calculateSteelComponent = (
     stress,
   };
 };
+
+export const calculateNominalAxialForce = (
+  concrete: CapacityComponent,
+  tensionSteel: CapacityComponent,
+  compressionSteel?: CapacityComponent,
+): number => {
+  // TODO
+  // return concrete.force + tensionSteel.force + (compressionSteel?.force ?? 0);
+  return 0;
+};
+
+export const calculateMomentAboutSectionCentroid = (
+  force: number,
+  depthFromCompressionFace: number,
+  sectionDepth: number,
+): number => force * (sectionDepth / 2 - depthFromCompressionFace);
+
 
 /**
  * Calculates one nominal P-M capacity point for a rectangular section.

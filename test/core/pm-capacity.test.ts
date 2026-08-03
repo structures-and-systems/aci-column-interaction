@@ -8,49 +8,108 @@ import {
 } from "../../src/core";
 import { createInput, expectedOutput, calcTolerance } from "./fixtures";
 
-describe("calculateSteelStrain", () => {
+describe("1. Tension Steel", () => {
+  const { assumptions, neutralAxisDepth, steel, tensionSteel } = createInput();
+  const tensionSteelStrain = calculateSteelStrain(
+    assumptions.ultimateConcreteStrain,
+    neutralAxisDepth,
+    tensionSteel.depthFromCompressionFace
+  );
+  const tensionSteelStress = calculateSteelStressWithYieldCap(
+    tensionSteelStrain,
+    steel.elasticModulus,
+    steel.yieldStrength
+  );
+  const tensionSteelForce = tensionSteelStress * tensionSteel.area;
+
+  it("returns 0 stress for 0 strain", () => {
+    expect(calculateSteelStressWithYieldCap(0, 200_000, 500)).toBe(0);
+  });
+
   it("returns expected tension steel strain from a given neutral axis", () => {
-    const _steelStrain = calculateSteelStrain(
-      0.003,
-      expectedOutput.neutralAxisDepth,
-      expectedOutput.tensionSteelComponent.depthFromCompressionFace
-    );
     expect(
-      calcTolerance(_steelStrain, expectedOutput.tensionSteelComponent.strain!, 0.01)
+      calcTolerance(tensionSteelStrain, expectedOutput.tensionSteelComponent.strain!, 0.01)
+    ).toBe(true);
+  });
+
+  it("returns expected steel tensile stress from a given neutral axis", () => {
+    expect(
+      calcTolerance(tensionSteelStress, expectedOutput.tensionSteelComponent.stress!, 0.01)
+    ).toBe(true);
+  });
+
+  it("returns expected steel tension force from a given neutral axis", () => {
+    expect(
+      calcTolerance(tensionSteelForce, expectedOutput.tensionSteelComponent.force!, 0.01)
     ).toBe(true);
   });
 });
 
-describe("calculateConcreteCompression", () => {
-  const input = createInput();
+describe("2. Concrete Compression", () => {
+  const { assumptions, concrete, neutralAxisDepth, section } = createInput();
   it("returns expected concrete compression force from a given neutral axis", () => {
     const block = calculateConcreteCompressionBlock(
-      input.section,
-      input.concrete,
-      input.assumptions,
-      expectedOutput.neutralAxisDepth,
+      section,
+      concrete,
+      assumptions,
+      neutralAxisDepth,
     );
     expect(block.force).toBeCloseTo(expectedOutput.concreteComponent.force);
     expect(calcTolerance(block.force, expectedOutput.concreteComponent.force, 0.01)).toBe(true);
   });
 });
 
-// describe("calculateSteelStressWithYieldCap", () => {
-//   it("converts signed strain to elastic stress", () => {
-//     expect(calculateSteelStress(-0.001, 200_000)).toBe(-200);
-//   });
+describe("3. Steel Stress with Yield Cap", () => {
+  const { concrete, steel, tensionSteel, compressionSteel } = createInput();
+  it("converts signed strain to elastic stress", () => {
+    expect(calculateSteelStress(-0.001, 200_000)).toBe(-200);
+  });
 
-//   it("preserves elastic stress within yield limits", () => {
-//     expect(calculateSteelStressWithYieldCap(0.001, 200_000, 500)).toBe(200);
-//   });
+  it("preserves elastic stress within yield limits", () => {
+    expect(calculateSteelStressWithYieldCap(0.001, 200_000, 500)).toBe(200);
+  });
 
-//   it("caps both compression and tension stress at yield", () => {
-//     expect(calculateSteelStressWithYieldCap(0.004, 200_000, 500)).toBe(500);
-//     expect(calculateSteelStressWithYieldCap(-0.004, 200_000, 500)).toBe(
-//       -500,
-//     );
-//   });
-// });
+  it("caps both compression and tension stress at yield", () => {
+    const obviouslyLargeStrain = 400;
+    expect(calculateSteelStressWithYieldCap(obviouslyLargeStrain, 200_000, 500)).toBe(500);
+    expect(calculateSteelStressWithYieldCap(-obviouslyLargeStrain, 200_000, 500)).toBe(-500);
+  });
+});
+
+describe("4. Compression Steel", () => {
+  const { assumptions, compressionSteel, neutralAxisDepth, steel } = createInput();
+  const compressionSteelStrain = calculateSteelStrain(
+    assumptions.ultimateConcreteStrain,
+    neutralAxisDepth,
+    compressionSteel!.depthFromCompressionFace
+  );
+  const compressionSteelStress = calculateSteelStressWithYieldCap(
+    compressionSteelStrain,
+    steel.elasticModulus,
+    steel.yieldStrength
+  );
+  const compressionSteelForce = compressionSteelStress * compressionSteel!.area;
+
+  it("returns expected steel compressive stress from a given neutral axis", () => {
+    expect(
+      calcTolerance(compressionSteelStress, expectedOutput.compressionSteelComponent.stress!, 0.01)
+    ).toBe(true);
+  });
+
+  it("returns expected steel compression force from a given neutral axis", () => {
+    expect(
+      calcTolerance(compressionSteelForce, expectedOutput.compressionSteelComponent.force!, 0.01)
+    ).toBe(true);
+  });
+});
+
+describe("5. P-M Capacity Point", () => {
+  const { nominalAxialForce, nominalMoment, components } = calculatePmCapacityPoint(createInput());
+  it("returns expected nominal axial force", () => {
+    expect(nominalAxialForce).toBe(expectedOutput.nominalAxialForce);
+    expect(calcTolerance(nominalAxialForce, expectedOutput.nominalAxialForce, 0.01)).toBe(true);
+  });
+});
 
 // describe("calculatePmCapacityPoint", () => {
 //   it("assembles signed concrete and steel forces and centroid moments", () => {
