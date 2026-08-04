@@ -1,5 +1,7 @@
 
-import type { PmCapacityInput, CapacityComponent } from "../../src/core";
+import type { CapacityInput, CapacityComponent } from "../../src/core";
+
+const axialStrengthCapFactor = 0.8;
 
 export const calcTolerance = (out: number, expected: number, tol: number = 0.05): boolean => {
   if (Math.abs((out / expected) - 1) < tol) {
@@ -8,7 +10,7 @@ export const calcTolerance = (out: number, expected: number, tol: number = 0.05)
   return false;
 };
 
-export const createInput = (): PmCapacityInput => ({
+export const createInput = (): CapacityInput => ({
   section: { width: 450, depth: 450 },
   neutralAxisDepth: 300,
   concrete: { compressiveStrength: 21 },
@@ -17,6 +19,7 @@ export const createInput = (): PmCapacityInput => ({
     ultimateConcreteStrain: 0.003,
     beta1: 0.85,
     rectangularCompressionStressCoefficient: 0.85,
+    axialStrengthCapFactor: axialStrengthCapFactor,
   },
   tensionSteel: { area: 402, depthFromCompressionFace: 392 },
   compressionSteel: { area: 402, depthFromCompressionFace: 62.5 },
@@ -51,7 +54,7 @@ const _compressionSteelComponent: CapacityComponent = {
 };
 
 export const expectedOutput = {
-  nominalAxialForce: 2_133_571.8,
+  nominalAxialForce: 2_133_571.8 * axialStrengthCapFactor,
   ultimateAxialForce: 1080.4,
   nominalMoment: 207.0,
   neutralAxisDepth: _neutralAxisDepth,

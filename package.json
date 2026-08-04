@@ -6,6 +6,7 @@
   "scripts": {
     "checkTest": "bun run typecheck && bun run test",
     "test": "jest",
+    "test-core": "jest ./test/core --verbose",
     "test-pm": "jest ./test/core/pm-capacity.test.ts --verbose",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit"

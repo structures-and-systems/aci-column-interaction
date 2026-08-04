@@ -5,8 +5,8 @@ export type CapacityComponentName =
   | "compressionSteel";
 
 /** Component breakdown returned with a nominal P-M capacity point. */
-export type PmCapacityComponents = {
+export type CapacityComponents = {
   readonly concrete: import("./interfaces.ts").CapacityComponent;
   readonly tensionSteel: import("./interfaces.ts").CapacityComponent;
-  readonly compressionSteel?: import("./interfaces.ts").CapacityComponent;
+  readonly compressionSteel?: import("./interfaces.ts").CapacityComponent | null;
 };

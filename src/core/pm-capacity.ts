@@ -14,20 +14,21 @@ import type {
   CapacityComponent,
   ConcreteCompressionBlock,
   ConcreteMaterial,
-  PmCapacityInput,
-  PmCapacityPoint,
-  PmCalculationAssumptions,
+  CapacityInput,
+  CapacityPoint,
+  CalculationAssumptions,
   RectangularSection,
   ResolvedSteel,
   SteelMaterial,
 } from "./interfaces.ts";
+import type { CapacityComponents } from "./types.ts";
 import { validatePmCapacityInput } from "./helpers.ts";
 
 /**
  * Returns signed strain at a depth based on a linear distribution.
  * Positive strain is compression and negative strain is tension.
  */
-export const calculateSteelStrain = (
+export const steelStrain = (
   ultimateConcreteStrain: number,
   neutralAxisDepth: number,
   depthFromCompressionFace: number,
@@ -36,18 +37,18 @@ export const calculateSteelStrain = (
   (1 - depthFromCompressionFace / neutralAxisDepth);
 
 /** Converts signed steel strain to signed elastic stress. */
-export const calculateSteelStress = (
+export const steelStress = (
   steelStrain: number,
   elasticModulus: number,
 ): number => steelStrain * elasticModulus;
 
 /** Caps signed elastic steel stress at the positive and negative yield limits. */
-export const calculateSteelStressWithYieldCap = (
+export const steelStressWithYieldCap = (
   steelStrain: number,
   elasticModulus: number,
   yieldStrength: number,
 ): number => {
-  const elasticStress = calculateSteelStress(steelStrain, elasticModulus);
+  const elasticStress = steelStress(steelStrain, elasticModulus);
   return Math.max(-yieldStrength, Math.min(yieldStrength, elasticStress));
 };
 
@@ -55,10 +56,10 @@ export const calculateSteelStressWithYieldCap = (
  * Calculates the equivalent rectangular concrete compression block. The block
  * cannot extend past the physical section even when beta1*c does.
  */
-export const calculateConcreteCompressionBlock = (
+export const concreteCompressionBlock = (
   section: RectangularSection,
   concrete: ConcreteMaterial,
-  assumptions: PmCalculationAssumptions,
+  assumptions: CalculationAssumptions,
   neutralAxisDepth: number,
 ): ConcreteCompressionBlock => {
   const depth = Math.min(assumptions.beta1 * neutralAxisDepth, section.depth);
@@ -75,34 +76,39 @@ export const calculateConcreteCompressionBlock = (
   };
 };
 
-export const calculateSteelComponent = (
+export const netConcreteCompression = (
+  compressionForce: number,
+  compressionSteel: ResolvedSteel,
+  assumptions: CalculationAssumptions,
+  concrete: ConcreteMaterial
+) => {
+  const { rectangularCompressionStressCoefficient } = assumptions;
+  const { compressiveStrength } = concrete;
+  return compressionForce - (compressionSteel.area * compressiveStrength * rectangularCompressionStressCoefficient);
+}
+
+export const steelComponent = (
   name: "tensionSteel" | "compressionSteel",
   resolvedSteel: ResolvedSteel,
-  input: PmCapacityInput,
-  concreteBlock: ConcreteCompressionBlock,
+  input: CapacityInput
 ): CapacityComponent => {
-  const strain = calculateSteelStrain(
+  const strain = steelStrain(
     input.assumptions.ultimateConcreteStrain,
     input.neutralAxisDepth,
     resolvedSteel.depthFromCompressionFace,
   );
-  const stress = calculateSteelStressWithYieldCap(
+  const stress = steelStressWithYieldCap(
     strain,
     input.steel.elasticModulus,
     input.steel.yieldStrength,
   );
-  const displacedConcreteStress =
-    resolvedSteel.depthFromCompressionFace < concreteBlock.depth
-      ? input.assumptions.rectangularCompressionStressCoefficient *
-      input.concrete.compressiveStrength
-      : 0;
-  const force = (stress - displacedConcreteStress) * resolvedSteel.area;
+  const force = stress * resolvedSteel.area;
 
   return {
     name,
     force,
     depthFromCompressionFace: resolvedSteel.depthFromCompressionFace,
-    momentAboutSectionCentroid: calculateMomentAboutSectionCentroid(
+    momentAboutSectionCentroid: momentAboutSectionCentroid(
       force,
       resolvedSteel.depthFromCompressionFace,
       input.section.depth,
@@ -112,17 +118,12 @@ export const calculateSteelComponent = (
   };
 };
 
-export const calculateNominalAxialForce = (
-  concrete: CapacityComponent,
-  tensionSteel: CapacityComponent,
-  compressionSteel?: CapacityComponent,
-): number => {
-  // TODO
-  // return concrete.force + tensionSteel.force + (compressionSteel?.force ?? 0);
-  return 0;
+export const nominalAxialStrength = (components: CapacityComponents): number => {
+  const { concrete, tensionSteel, compressionSteel } = components;
+  return concrete.force + tensionSteel.force + (compressionSteel?.force ?? 0);
 };
 
-export const calculateMomentAboutSectionCentroid = (
+export const momentAboutSectionCentroid = (
   force: number,
   depthFromCompressionFace: number,
   sectionDepth: number,
@@ -135,57 +136,62 @@ export const calculateMomentAboutSectionCentroid = (
  * The caller must have resolved reinforcement layout into aggregate steel
  * groups before invoking this function.
  */
-export const calculatePmCapacityPoint = (
-  input: PmCapacityInput,
-): PmCapacityPoint => {
+export const capacityPoint = (
+  input: CapacityInput,
+): CapacityPoint => {
   validatePmCapacityInput(input);
+  const { assumptions, concrete, neutralAxisDepth, section, steel, tensionSteel, compressionSteel } = input;
 
-  const concreteBlock = calculateConcreteCompressionBlock(
-    input.section,
-    input.concrete,
-    input.assumptions,
-    input.neutralAxisDepth,
+  const concreteBlock: ConcreteCompressionBlock = concreteCompressionBlock(
+    section,
+    concrete,
+    assumptions,
+    neutralAxisDepth,
   );
-  const concrete: CapacityComponent = {
+
+  let concreteForce: number = concreteBlock.force;
+  let compressionSteelComponent: CapacityComponent | null = null;
+
+  if (compressionSteel) {
+    compressionSteelComponent = steelComponent(
+      "compressionSteel",
+      compressionSteel,
+      input
+    );
+    // update concrete force to account for compression steel contribution
+    concreteForce = netConcreteCompression(concreteForce, compressionSteel, assumptions, concrete);
+  }
+
+  const concreteComponent: CapacityComponent = {
     name: "concrete",
-    force: concreteBlock.force,
+    force: concreteForce,
     depthFromCompressionFace: concreteBlock.centroidDepthFromCompressionFace,
-    momentAboutSectionCentroid: calculateMomentAboutSectionCentroid(
-      concreteBlock.force,
+    momentAboutSectionCentroid: momentAboutSectionCentroid(
+      concreteForce,
       concreteBlock.centroidDepthFromCompressionFace,
       input.section.depth,
     ),
   };
-  const tensionSteel = calculateSteelComponent(
-    "tensionSteel",
-    input.tensionSteel,
-    input,
-    concreteBlock,
-  );
-  const compressionSteel =
-    input.compressionSteel === undefined
-      ? undefined
-      : calculateSteelComponent(
-        "compressionSteel",
-        input.compressionSteel,
-        input,
-        concreteBlock,
-      );
-  const nominalAxialForce =
-    concrete.force + tensionSteel.force + (compressionSteel?.force ?? 0);
-  const nominalMoment =
-    concrete.momentAboutSectionCentroid +
-    tensionSteel.momentAboutSectionCentroid +
-    (compressionSteel?.momentAboutSectionCentroid ?? 0);
+  const tensionSteelComponent: CapacityComponent = steelComponent("tensionSteel", tensionSteel, input);
+
+  const pn = nominalAxialStrength({
+    concrete: concreteComponent,
+    tensionSteel: tensionSteelComponent,
+    compressionSteel: compressionSteelComponent,
+  });
+  const mn =
+    concreteComponent.momentAboutSectionCentroid +
+    tensionSteelComponent.momentAboutSectionCentroid +
+    (compressionSteelComponent!.momentAboutSectionCentroid ?? 0);
 
   return {
-    neutralAxisDepth: input.neutralAxisDepth,
-    nominalAxialForce,
-    nominalMoment,
+    neutralAxisDepth,
+    nominalAxialStrength: pn * (assumptions.axialStrengthCapFactor ?? 1),
+    nominalMoment: mn,
     components: {
-      concrete,
-      tensionSteel,
-      ...(compressionSteel === undefined ? {} : { compressionSteel }),
+      concrete: concreteComponent,
+      tensionSteel: tensionSteelComponent,
+      ...(compressionSteelComponent === null ? {} : { compressionSteel: compressionSteelComponent }),
     },
   };
 };

@@ -1,4 +1,4 @@
-import type { PmCapacityInput, ResolvedSteel } from "./interfaces.ts";
+import type { CapacityInput, ResolvedSteel } from "./interfaces.ts";
 
 const isPositiveFinite = (value: number): boolean =>
   Number.isFinite(value) && value > 0;
@@ -28,7 +28,7 @@ const validateSteelDepth = (
 };
 
 /** Validates all public calculation inputs before force equilibrium is evaluated. */
-export const validatePmCapacityInput = (input: PmCapacityInput): void => {
+export const validatePmCapacityInput = (input: CapacityInput): void => {
   validatePositiveFinite("section.width", input.section.width);
   validatePositiveFinite("section.depth", input.section.depth);
   validatePositiveFinite("neutralAxisDepth", input.neutralAxisDepth);
@@ -49,7 +49,7 @@ export const validatePmCapacityInput = (input: PmCapacityInput): void => {
   );
   validateSteelDepth("tensionSteel", input.tensionSteel, input.section.depth);
 
-  if (input.compressionSteel !== undefined) {
+  if (input.compressionSteel) {
     validateSteelDepth(
       "compressionSteel",
       input.compressionSteel,

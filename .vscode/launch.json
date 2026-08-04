@@ -7,15 +7,16 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Jest: PM Core Tests",
+            "name": "PM Core Tests",
             "cwd": "${workspaceFolder}",
-            "runtimeExecutable": "node",
+            "runtimeExecutable": "/home/icomanman/.nvm/versions/node/v25.1.0/bin/node",
             "runtimeArgs": [
                 "--experimental-vm-modules",
                 "${workspaceFolder}/node_modules/jest/bin/jest.js"
             ],
             "args": [
-                "${workspaceFolder}/test/core/pm-capacity.test.ts",
+                // "${workspaceFolder}/test/core/pm-capacity.test.ts",
+                "${workspaceFolder}/test/core",
                 "--runInBand"
             ],
             "console": "integratedTerminal",

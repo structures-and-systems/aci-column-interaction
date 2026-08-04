@@ -1,11 +1,11 @@
 export {
-  calculatePmCapacityPoint,
-  calculateSteelComponent,
-  calculateMomentAboutSectionCentroid,
-  calculateConcreteCompressionBlock,
-  calculateSteelStrain,
-  calculateSteelStress,
-  calculateSteelStressWithYieldCap,
+  capacityPoint,
+  steelComponent,
+  momentAboutSectionCentroid,
+  concreteCompressionBlock,
+  steelStrain,
+  steelStress,
+  steelStressWithYieldCap,
 } from "./pm-capacity.ts";
 
 export { validatePmCapacityInput } from "./helpers.ts";

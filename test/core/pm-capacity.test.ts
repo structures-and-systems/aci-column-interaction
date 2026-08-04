@@ -1,21 +1,21 @@
 import { describe, expect, it } from "@jest/globals";
 import {
-  calculateConcreteCompressionBlock,
-  calculatePmCapacityPoint,
-  calculateSteelStrain,
-  calculateSteelStress,
-  calculateSteelStressWithYieldCap
+  concreteCompressionBlock,
+  capacityPoint,
+  steelStrain,
+  steelStress,
+  steelStressWithYieldCap
 } from "../../src/core";
 import { createInput, expectedOutput, calcTolerance } from "./fixtures";
 
 describe("1. Tension Steel", () => {
   const { assumptions, neutralAxisDepth, steel, tensionSteel } = createInput();
-  const tensionSteelStrain = calculateSteelStrain(
+  const tensionSteelStrain = steelStrain(
     assumptions.ultimateConcreteStrain,
     neutralAxisDepth,
     tensionSteel.depthFromCompressionFace
   );
-  const tensionSteelStress = calculateSteelStressWithYieldCap(
+  const tensionSteelStress = steelStressWithYieldCap(
     tensionSteelStrain,
     steel.elasticModulus,
     steel.yieldStrength
@@ -23,7 +23,7 @@ describe("1. Tension Steel", () => {
   const tensionSteelForce = tensionSteelStress * tensionSteel.area;
 
   it("returns 0 stress for 0 strain", () => {
-    expect(calculateSteelStressWithYieldCap(0, 200_000, 500)).toBe(0);
+    expect(steelStressWithYieldCap(0, 200_000, 500)).toBe(0);
   });
 
   it("returns expected tension steel strain from a given neutral axis", () => {
@@ -48,7 +48,7 @@ describe("1. Tension Steel", () => {
 describe("2. Concrete Compression", () => {
   const { assumptions, concrete, neutralAxisDepth, section } = createInput();
   it("returns expected concrete compression force from a given neutral axis", () => {
-    const block = calculateConcreteCompressionBlock(
+    const block = concreteCompressionBlock(
       section,
       concrete,
       assumptions,
@@ -62,28 +62,28 @@ describe("2. Concrete Compression", () => {
 describe("3. Steel Stress with Yield Cap", () => {
   const { concrete, steel, tensionSteel, compressionSteel } = createInput();
   it("converts signed strain to elastic stress", () => {
-    expect(calculateSteelStress(-0.001, 200_000)).toBe(-200);
+    expect(steelStress(-0.001, 200_000)).toBe(-200);
   });
 
   it("preserves elastic stress within yield limits", () => {
-    expect(calculateSteelStressWithYieldCap(0.001, 200_000, 500)).toBe(200);
+    expect(steelStressWithYieldCap(0.001, 200_000, 500)).toBe(200);
   });
 
   it("caps both compression and tension stress at yield", () => {
     const obviouslyLargeStrain = 400;
-    expect(calculateSteelStressWithYieldCap(obviouslyLargeStrain, 200_000, 500)).toBe(500);
-    expect(calculateSteelStressWithYieldCap(-obviouslyLargeStrain, 200_000, 500)).toBe(-500);
+    expect(steelStressWithYieldCap(obviouslyLargeStrain, 200_000, 500)).toBe(500);
+    expect(steelStressWithYieldCap(-obviouslyLargeStrain, 200_000, 500)).toBe(-500);
   });
 });
 
 describe("4. Compression Steel", () => {
   const { assumptions, compressionSteel, neutralAxisDepth, steel } = createInput();
-  const compressionSteelStrain = calculateSteelStrain(
+  const compressionSteelStrain = steelStrain(
     assumptions.ultimateConcreteStrain,
     neutralAxisDepth,
     compressionSteel!.depthFromCompressionFace
   );
-  const compressionSteelStress = calculateSteelStressWithYieldCap(
+  const compressionSteelStress = steelStressWithYieldCap(
     compressionSteelStrain,
     steel.elasticModulus,
     steel.yieldStrength
@@ -104,10 +104,10 @@ describe("4. Compression Steel", () => {
 });
 
 describe("5. P-M Capacity Point", () => {
-  const { nominalAxialForce, nominalMoment, components } = calculatePmCapacityPoint(createInput());
+  const { nominalAxialStrength, nominalMoment, components } = capacityPoint(createInput());
   it("returns expected nominal axial force", () => {
-    expect(nominalAxialForce).toBe(expectedOutput.nominalAxialForce);
-    expect(calcTolerance(nominalAxialForce, expectedOutput.nominalAxialForce, 0.01)).toBe(true);
+    expect(nominalAxialStrength).toBe(expectedOutput.nominalAxialForce);
+    expect(calcTolerance(nominalAxialStrength, expectedOutput.nominalAxialForce, 0.01)).toBe(true);
   });
 });
 

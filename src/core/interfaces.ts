@@ -1,6 +1,6 @@
 import type {
   CapacityComponentName,
-  PmCapacityComponents,
+  CapacityComponents,
 } from "./types.ts";
 
 /** Rectangular section geometry in the caller's length unit. */
@@ -37,24 +37,26 @@ export interface ResolvedSteel {
 }
 
 /** Explicit assumptions for the rectangular concrete stress block. */
-export interface PmCalculationAssumptions {
+export interface CalculationAssumptions {
   /** Ultimate compression-face concrete strain; compression is positive. */
   readonly ultimateConcreteStrain: number;
   /** Multiplier from neutral-axis depth to equivalent block depth. */
   readonly beta1: number;
   /** Multiplier applied to specified concrete compressive strength. */
   readonly rectangularCompressionStressCoefficient: number;
+  /** ACI Max axial strength factor. */
+  readonly axialStrengthCapFactor?: number;
 }
 
 /** All data required to calculate one nominal P-M capacity point. */
-export interface PmCapacityInput {
+export interface CapacityInput {
   readonly section: RectangularSection;
   readonly neutralAxisDepth: number;
   readonly concrete: ConcreteMaterial;
   readonly steel: SteelMaterial;
-  readonly assumptions: PmCalculationAssumptions;
+  readonly assumptions: CalculationAssumptions;
   readonly tensionSteel: ResolvedSteel;
-  readonly compressionSteel?: ResolvedSteel;
+  readonly compressionSteel?: ResolvedSteel | null;
 }
 
 /** One signed force component resolved at a compression-face depth. */
@@ -83,13 +85,13 @@ export interface ConcreteCompressionBlock {
 }
 
 /** Nominal section capacity at one supplied neutral-axis depth. */
-export interface PmCapacityPoint {
+export interface CapacityPoint {
   readonly neutralAxisDepth: number;
   /** Signed nominal axial capacity: compression positive. */
-  readonly nominalAxialForce: number;
+  readonly nominalAxialStrength: number;
   /** Signed nominal moment about the section centroid. */
   readonly nominalMoment: number;
-  readonly components: PmCapacityComponents;
+  readonly components: CapacityComponents;
 }
 
 // Output for validation tests agains the spreadsheet
